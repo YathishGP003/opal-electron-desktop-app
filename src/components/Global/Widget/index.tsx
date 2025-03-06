@@ -1,8 +1,9 @@
-import { ClerkLoading, SignedIn, useUser } from "@clerk/clerk-react";
-import { Loader } from "../Loader";
+import { ClerkLoading, useUser, SignedIn } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { fetchUserProfile } from "@/lib/utils";
+import { Loader } from "../Loader";
 import { useMediaSources } from "@/hooks/useMediaSources";
+import MediaConfiguration from "../MediaConfiguration";
 
 const Widget = () => {
   const [profile, setProfile] = useState<{
@@ -34,20 +35,12 @@ const Widget = () => {
   const { user } = useUser();
 
   const { state, fetchMediaResources } = useMediaSources();
-  console.log("Media state:", state);
 
   useEffect(() => {
     if (user && user.id) {
       fetchUserProfile(user.id).then((p) => setProfile(p));
     }
   }, [user]);
-
-  // useEffect(() => {
-  //   if (profile) {
-  //     console.log("status:", profile.status);
-  //     console.log("User:", profile.user);
-  //   }
-  // }, [profile]);
 
   return (
     <div className="p-5">
