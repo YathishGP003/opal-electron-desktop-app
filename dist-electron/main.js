@@ -12,7 +12,7 @@ let studio;
 let floatingWebCam;
 function createWindow() {
   win = new BrowserWindow({
-    width: 500,
+    width: 600,
     height: 600,
     minHeight: 600,
     minWidth: 300,
@@ -26,13 +26,12 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       devTools: true,
-      preload: path.join(__dirname, "preload.mjs"),
-      webSecurity: true
+      preload: path.join(__dirname, "preload.mjs")
     }
   });
   studio = new BrowserWindow({
     width: 400,
-    height: 50,
+    height: 300,
     minHeight: 70,
     maxHeight: 400,
     minWidth: 300,
@@ -72,11 +71,19 @@ function createWindow() {
   win.setAlwaysOnTop(true, "screen-saver", 1);
   studio.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   studio.setAlwaysOnTop(true, "screen-saver", 1);
+  floatingWebCam.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  floatingWebCam.setAlwaysOnTop(true, "screen-saver", 1);
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
   studio.webContents.on("did-finish-load", () => {
     studio == null ? void 0 : studio.webContents.send(
+      "main-process-message",
+      (/* @__PURE__ */ new Date()).toLocaleString()
+    );
+  });
+  floatingWebCam.webContents.on("did-finish-load", () => {
+    floatingWebCam == null ? void 0 : floatingWebCam.webContents.send(
       "main-process-message",
       (/* @__PURE__ */ new Date()).toLocaleString()
     );
@@ -108,25 +115,19 @@ ipcMain.on("closeApp", () => {
   }
 });
 ipcMain.handle("getSources", async () => {
-  try {
-    const data = await desktopCapturer.getSources({
-      types: ["window", "screen"],
-      thumbnailSize: { height: 100, width: 150 },
-      fetchWindowIcons: true
-    });
-    console.log("Fetched Sources:", data);
-    return data;
-  } catch (error) {
-    console.error("Error fetching sources:", error);
-    throw error;
-  }
+  const data = await desktopCapturer.getSources({
+    thumbnailSize: { height: 100, width: 150 },
+    fetchWindowIcons: true,
+    types: ["window", "screen"]
+  });
+  return data;
 });
-ipcMain.on("media-sources", (event, payload) => {
-  console.log(event);
+ipcMain.on("media-sources", (_, payload) => {
+  console.log("EVENT:📸 media sources", payload);
   studio == null ? void 0 : studio.webContents.send("profile-received", payload);
 });
-ipcMain.on("resize-studio", (event, payload) => {
-  console.log(event);
+ipcMain.on("resize-studio", (_, payload) => {
+  console.log("EVENT:🎬 resize studio", payload);
   if (payload.shrink) {
     studio == null ? void 0 : studio.setSize(400, 100);
   }
@@ -134,8 +135,8 @@ ipcMain.on("resize-studio", (event, payload) => {
     studio == null ? void 0 : studio.setSize(400, 250);
   }
 });
-ipcMain.on("hide-plugin", (event, payload) => {
-  console.log(event);
+ipcMain.on("hide-plugin", (_, payload) => {
+  console.log("EVENT: hide plugin", payload);
   win == null ? void 0 : win.webContents.send("hide-plugin", payload);
 });
 app.on("activate", () => {
