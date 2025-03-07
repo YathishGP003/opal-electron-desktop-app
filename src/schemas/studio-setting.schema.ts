@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const updateStudioSettingsSchema = z.object({
+export const updateStudioSettingSchema = z.object({
   screen: z.string(),
   audio: z.string(),
-  preset: z.enum(["HD", "SD"]),
+  preset: z.enum(['HD', 'SD']),
 });
